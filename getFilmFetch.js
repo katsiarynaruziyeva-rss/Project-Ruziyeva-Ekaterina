@@ -1,0 +1,27 @@
+import { adapterAPIToModel } from "./adapter";
+
+async function getToken() {
+  const respToken = await fetch("https://fe08-films.herokuapp.com/auth", {
+    headers: {
+      "Content-type": "application/json",
+    },
+    method: "POST",
+  });
+  return await respToken.text();
+}
+
+export async function getFilmsList() {
+  let token = JSON.parse(await getToken());
+  const respfilmsList = await fetch("https://fe08-films.herokuapp.com/films", {
+    headers: {
+      Autorization: `Beare ${token.token}`,
+    },
+    method: "GET",
+  });
+  const newfilms = await respfilmsList.json();
+  let films = Array.from(newfilms.films);
+  if (localStorage.getItem("allFilms") === null) {
+    localStorage.setItem("allFilms", JSON.stringify(adapterAPIToModel(films)));
+  }
+  return adapterAPIToModel(films);
+}
